@@ -17,31 +17,37 @@ intents.members = True
 bot = commands.Bot(command_prefix='-', intents=intents)
 
 # ==========================================
-# ⚙️ ตั้งค่า (แก้ไขชื่อห้อง/ยศ ตรงนี้)
+# ⚙️ ตั้งค่า
 # ==========================================
-PUBLIC_CHANNEL = "ห้องแนะนำตัว"         # ห้องที่จะส่งใบแนะนำตัวไป
-ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"      # ยศที่จะให้หลังจากแนะนำตัว
-ROLE_WWM = "ข้าคือจอมยุทธ์เด๊ะ"         # ยศสำหรับคนเล่นเกม WWM
+PUBLIC_CHANNEL = "ห้องแนะนำตัว"
+ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"
+ROLE_WWM = "ข้าคือจอมยุทธ์เด๊ะ"
 HISTORY_FILE = "history.json"
-
-# 🔥 ชื่อห้องที่อนุญาตให้ดูดวง (ต้องตั้งชื่อห้องใน Discord ให้ตรงกับคำนี้เป๊ะๆ)
 ALLOWED_CHANNEL_FORTUNE = "ห้องเช็คดวง"
 
-# --- 🧠 ตั้งค่า AI (Gemini) ---
+# ==========================================
+# 🧠 ตั้งค่า AI (Gemini) - ย้ายออกมากันบั๊ก
+# ==========================================
+
+# 1. กำหนดนิสัยบอท (เอาไว้นอก Try เพื่อให้ตัวแปรนี้มีอยู่เสมอ)
+BOT_PERSONA = """
+คุณคือ "Devils DenBot" บอทประจำกิลด์เกม "Where Winds Meet" 
+นิสัยของคุณคือ: เป็นจอมยุทธ์ผู้เก่งกาจในยุทธภพ, กวนประสาทนิดๆ, เฮฮา, รักพวกพ้อง
+คำพูดติดปาก: "ข้าคือจอมยุทธ์เด๊ะ", "ประเสริฐ", "นับถือๆ"
+เวลาตอบคำถาม: ให้ตอบสั้นๆ กระชับ ได้ใจความ และลงท้ายด้วยคำพูดสไตล์หนังจีนกำลังภายใน
+"""
+
+model = None # ประกาศตัวแปร model ไว้ก่อน
+
 try:
-    # ดึง Key จาก Koyeb
-    GENAI_KEY = os.environ['GEMINI_API_KEY']
-    genai.configure(api_key=GENAI_KEY)
-    model = genai.GenerativeModel('gemini-pro')
-    
-    # นิสัยบอท
-    BOT_PERSONA = """
-    คุณคือ "Devils DenBot" บอทประจำกิลด์เกม "Where Winds Meet" 
-    นิสัย: จอมยุทธ์เจ้าสำราญ, กวนประสาทนิดๆ, รักพวกพ้อง
-    คำพูดติดปาก: "ข้าคือจอมยุทธ์เด๊ะ", "ประเสริฐ", "นับถือๆ"
-    การตอบ: สั้นกระชับ ได้ใจความ สไตล์หนังจีนกำลังภายใน
-    """
-    print("✅ AI System: Ready")
+    # 2. พยายามเชื่อมต่อสมอง AI
+    if 'GEMINI_API_KEY' in os.environ:
+        GENAI_KEY = os.environ['GEMINI_API_KEY']
+        genai.configure(api_key=GENAI_KEY)
+        model = genai.GenerativeModel('gemini-pro')
+        print("✅ AI System: Ready (สมองพร้อมใช้งาน)")
+    else:
+        print("⚠️ AI Warning: ไม่พบ GEMINI_API_KEY ใน Secrets")
 except Exception as e:
     print(f"⚠️ AI Error: {e}")
 
@@ -62,7 +68,6 @@ user_history = load_history()
 def log(message):
     print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {message}")
 
-# --- ฟังก์ชันรีเฟรชปุ่มแนะนำตัว ---
 async def refresh_setup_msg(channel):
     try:
         async for message in channel.history(limit=30):
@@ -78,7 +83,7 @@ async def refresh_setup_msg(channel):
     )
     await channel.send(embed=embed, view=TicketButton())
 
-# --- Dropdown เลือกเกม ---
+# --- Dropdown & Views ---
 class GameSelect(discord.ui.Select):
     def __init__(self):
         options = [
@@ -98,7 +103,6 @@ class GameView(discord.ui.View):
         self.selected_value = None
         self.add_item(GameSelect())
 
-# --- ปุ่มกด & ระบบสัมภาษณ์ ---
 class TicketButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -107,24 +111,17 @@ class TicketButton(discord.ui.View):
     async def create_ticket(self, interaction, button):
         user = interaction.user
         guild = interaction.guild
-        
         await interaction.response.send_message("⏳ กำลังเตรียมห้องส่วนตัว...", ephemeral=True)
-
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
         }
-
-        channel_name = f"verify-{user.name}"
         try:
-            ch = await guild.create_text_channel(channel_name, overwrites=overwrites)
-            
-            # ปุ่มลิ้งก์เข้าห้อง
+            ch = await guild.create_text_channel(f"verify-{user.name}", overwrites=overwrites)
             view = discord.ui.View()
             view.add_item(discord.ui.Button(label="👉 เข้าห้องส่วนตัว 👈", style=discord.ButtonStyle.link, url=ch.jump_url))
             await interaction.edit_original_response(content=f"✅ สร้างห้องเรียบร้อย! {user.mention}", view=view)
-            
             await self.start_interview(ch, user, guild)
         except Exception as e:
             log(f"Error: {e}")
@@ -132,19 +129,15 @@ class TicketButton(discord.ui.View):
     async def start_interview(self, channel, user, guild):
         data = {"name": "", "age": "", "game": "", "char_name": "-"}
         def check(m): return m.author == user and m.channel == channel
-
         try:
             await channel.send(f"{user.mention} **ยินดีต้อนรับครับ!** (ตอบคำถามในห้องนี้ได้เลย)")
-
-            # 1. ชื่อ
-            await channel.send(embed=discord.Embed(title="1. ชื่อเล่นของคุณคือ?", description="ชื่อนี้จะถูกนำไปต่อท้ายชื่อเดิม (เช่น: Ball)", color=0x3498db))
+            
+            await channel.send(embed=discord.Embed(title="1. ชื่อเล่นของคุณคือ?", color=0x3498db))
             data["name"] = (await bot.wait_for("message", check=check, timeout=300)).content
 
-            # 2. อายุ
             await channel.send(embed=discord.Embed(title="2. อายุเท่าไหร่?", color=0x3498db))
             data["age"] = (await bot.wait_for("message", check=check, timeout=300)).content
 
-            # 3. เกม
             view = GameView()
             await channel.send(embed=discord.Embed(title="3. เลือกเกมที่คุณเล่น", color=0x3498db), view=view)
             await view.wait()
@@ -154,55 +147,41 @@ class TicketButton(discord.ui.View):
             if data["game"] == "Where Winds Meet":
                 await channel.send(embed=discord.Embed(title="⚔️ ชื่อตัวละครของคุณคือ?", color=0xe74c3c))
                 data["char_name"] = (await bot.wait_for("message", check=check, timeout=300)).content
-                
                 role_wwm = discord.utils.get(guild.roles, name=ROLE_WWM)
                 if role_wwm: await user.add_roles(role_wwm)
 
-            # --- สรุปและส่งข้อมูล ---
             await channel.send("⏳ **กำลังบันทึกข้อมูล...**")
-            
             embed = discord.Embed(title="✅ สมาชิกใหม่รายงานตัว!", color=0xffd700)
             desc = f"**ชื่อเล่น :** {data['name']}\n**อายุ :** {data['age']}\n**เกมที่เล่น :** {data['game']}"
             if data["char_name"] != "-": desc += f"\n**ชื่อในเกม :** {data['char_name']}"
             embed.description = desc
             if user.avatar: embed.set_thumbnail(url=user.avatar.url)
-            embed.set_footer(text=f"แนะนำตัวโดย {user.name}")
-
+            
             pub_ch = discord.utils.get(guild.text_channels, name=PUBLIC_CHANNEL)
             sent_msg = None
             if pub_ch:
-                # ลบโพสต์เก่าถ้ามี
                 if str(user.id) in user_history:
                     try: (await pub_ch.fetch_message(user_history[str(user.id)])).delete()
                     except: pass
-                
                 sent_msg = await pub_ch.send(embed=embed)
                 user_history[str(user.id)] = sent_msg.id
                 save_history(user_history)
                 await refresh_setup_msg(pub_ch)
 
-            # ให้ยศและเปลี่ยนชื่อ
             role_ver = discord.utils.get(guild.roles, name=ROLE_VERIFIED)
             if role_ver: await user.add_roles(role_ver)
-            
             try: await user.edit(nick=f"{user.display_name} ({data['name']})")
             except: pass
 
-            # --- 🔙 คืนชีพปุ่มกลับ! ---
             if sent_msg:
                 view_back = discord.ui.View()
                 btn_back = discord.ui.Button(label="🔙 กดเพื่อไปดูผลลัพธ์", style=discord.ButtonStyle.link, url=sent_msg.jump_url, emoji="✨")
                 view_back.add_item(btn_back)
-                
-                embed_done = discord.Embed(title="✅ เรียบร้อย!", description="ห้องนี้จะถูกลบใน **10 วินาที**", color=0x00ff00)
-                await channel.send(embed=embed_done, view=view_back)
+                await channel.send(embed=discord.Embed(title="✅ เรียบร้อย!", description="ห้องจะลบใน 10 วินาที", color=0x00ff00), view=view_back)
             
             await asyncio.sleep(10)
             await channel.delete()
-
-        except Exception as e:
-            log(f"Interview Error: {e}")
-            await channel.delete()
+        except: await channel.delete()
 
 # ==========================================
 # ⚡ Slash Commands
@@ -213,11 +192,17 @@ async def sync(ctx):
     synced = await bot.tree.sync()
     await ctx.send(f"✅ Synced {len(synced)} commands.")
 
-# 🤖 ระบบถาม AI
+# 1. ระบบถาม AI (แก้บั๊กแล้ว)
 @bot.tree.command(name="ถาม", description="🤖 คุยกับท่านจอมยุทธ์ (AI)")
 @app_commands.describe(question="เรื่องที่อยากถาม")
 async def ask_ai(interaction: discord.Interaction, question: str):
     await interaction.response.defer()
+    
+    # เช็คว่า AI พร้อมไหม
+    if model is None:
+        await interaction.followup.send("⚠️ **ลมปราณติดขัด!** (ระบบ AI ยังไม่พร้อม หรือ API Key ผิดพลาด)", ephemeral=True)
+        return
+
     try:
         full_prompt = f"{BOT_PERSONA}\n\nคำถาม: {question}\nคำตอบ:"
         response = model.generate_content(full_prompt)
@@ -227,17 +212,15 @@ async def ask_ai(interaction: discord.Interaction, question: str):
         embed.set_footer(text=f"Q: {question} | โดย {interaction.user.name}")
         await interaction.followup.send(embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"😵 Error: {e}", ephemeral=True)
+        await interaction.followup.send(f"😵 **ธาตุไฟเข้าแทรก!** (Error: {e})", ephemeral=True)
 
-# 🔮 ระบบดูดวง (คืนชีพแบบเต็มสูบ)
+# 2. ระบบดูดวง (ฉบับ Tune/เกลือ)
 @bot.tree.command(name="ดูดวง", description="🔮 เช็คดวงกาชา/ตีบวก ประจำวัน")
 async def fortune(interaction: discord.Interaction):
-    # เช็คห้อง (แก้ชื่อห้องให้ตรงกับที่คุณต้องการแล้ว)
     if interaction.channel.name != ALLOWED_CHANNEL_FORTUNE:
-        await interaction.response.send_message(f"❌ **ผิดห้องครับ!**\nคำสั่งนี้เล่นได้เฉพาะในห้อง `{ALLOWED_CHANNEL_FORTUNE}` เท่านั้นครับ", ephemeral=True)
+        await interaction.response.send_message(f"❌ **ผิดห้องครับ!**\nเล่นได้เฉพาะห้อง `{ALLOWED_CHANNEL_FORTUNE}` เท่านั้นครับ", ephemeral=True)
         return
 
-    # คำทำนาย 10 แบบ (คืนชีพ!)
     fortunes = [
         "🌟 **เทพเจ้า RNG ประทับร่าง!** วันนี้กดอะไรก็ติด ออฟชั่นทองมาแน่!",
         "💀 **เกลือเค็มปี๋...** อย่าหาทำ Tune ออฟชั่นกาก พักก่อนโยม",
@@ -252,15 +235,14 @@ async def fortune(interaction: discord.Interaction):
     ]
     result = random.choice(fortunes)
     
-    # เลือกสีตามคำทำนาย
-    if "เทพเจ้า" in result or "แสง" in result: color = 0xffd700 # สีทอง
-    elif "เกลือ" in result or "ถังแตก" in result: color = 0x000000 # สีดำ
-    else: color = 0x3498db # สีฟ้า
+    if "เทพเจ้า" in result or "แสง" in result: color = 0xffd700
+    elif "เกลือ" in result or "ถังแตก" in result: color = 0x000000
+    else: color = 0x3498db
 
     embed = discord.Embed(title="🎲 ผลการเสี่ยงทายดวงชะตา", description=f"ผลลัพธ์ของ {interaction.user.mention} คือ...\n\n{result}", color=color)
     await interaction.response.send_message(embed=embed)
 
-# 🧹 ล้างแชท
+# 3. ล้างแชท
 @bot.tree.command(name="ล้าง", description="🧹 ลบข้อความล่าสุด")
 @app_commands.checks.has_permissions(manage_messages=True)
 async def clear_chat(interaction: discord.Interaction, amount: int):
@@ -268,6 +250,24 @@ async def clear_chat(interaction: discord.Interaction, amount: int):
     await interaction.response.defer(ephemeral=True)
     await interaction.channel.purge(limit=amount)
     await interaction.followup.send("🧹 เรียบร้อย!", ephemeral=True)
+
+# 4. ล้างห้อง (Nuke)
+@bot.tree.command(name="ล้างห้อง", description="⚠️ ลบห้องนี้ทิ้งแล้วสร้างใหม่ (Nuke)")
+@app_commands.checks.has_permissions(administrator=True)
+async def nuke_channel(interaction: discord.Interaction):
+    view = discord.ui.View()
+    async def confirm(i):
+        if i.user != interaction.user: return
+        await i.response.send_message("💣 บึ้มมมม...", ephemeral=True)
+        new_ch = await interaction.channel.clone(reason="Nuke by Bot")
+        await interaction.channel.delete()
+        await new_ch.send(f"✨ **ห้องใหม่ไฉไลกว่าเดิม!** (ล้างโดย {interaction.user.mention})")
+    
+    btn = discord.ui.Button(label="ยืนยันที่จะล้างห้อง?", style=discord.ButtonStyle.danger, emoji="💣")
+    btn.callback = confirm
+    view.add_item(btn)
+    
+    await interaction.response.send_message("⚠️ **คำเตือน:** ห้องนี้จะถูกลบและสร้างใหม่ ข้อความทั้งหมดจะหายไป!", view=view, ephemeral=True)
 
 @bot.event
 async def on_ready():
