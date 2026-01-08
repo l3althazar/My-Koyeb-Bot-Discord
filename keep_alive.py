@@ -121,7 +121,7 @@ html_code = """
         .stat-label { color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; }
 
         .services-section {
-            padding: 80px 20px; background: rgba(5, 0, 0, 0.9);
+            padding: 210px 20px; background: rgba(5, 0, 0, 0.9);
             text-align: center; backdrop-filter: blur(5px);
         }
         .section-header {
