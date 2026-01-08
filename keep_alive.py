@@ -35,13 +35,13 @@ html_code = """
             padding: 0;
             overflow-x: hidden;
             
-            /* 🔥 แก้ไขพื้นหลัง: ใส่รูปปราสาทโกธิค + เคลือบเงาสีดำแดง 🔥 */
+            /* 🔥 แก้ไขพื้นหลัง: เปลี่ยนเป็นรูปสไตล์ภาพวาดแฟนตาซี/Vector Art 🔥 */
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(30, 0, 0, 0.85)),
-                        url('https://images.unsplash.com/photo-1533154683836-84ea7a0bc310?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+                        url('https://cdn.pixabay.com/photo/2020/10/23/16/50/castle-5679267_1280.jpg');
             background-repeat: no-repeat;
             background-position: center center;
-            background-attachment: fixed; /* ทำให้รูปพื้นหลังอยู่กับที่เวลาเลื่อนหน้าจอ */
-            background-size: cover; /* ขยายรูปให้เต็มจอเสมอ */
+            background-attachment: fixed;
+            background-size: cover;
         }
 
         /* --- 🌫️ พื้นหลังหมอก --- */
@@ -49,7 +49,7 @@ html_code = """
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             overflow: hidden;
-            z-index: -1; /* อยู่หลังเนื้อหา แต่อยู่หน้ารูปพื้นหลัง body */
+            z-index: -1;
             pointer-events: none;
         }
         .fog-img {
@@ -59,7 +59,7 @@ html_code = """
             background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
             background-size: contain;
             animation: fog 60s linear infinite;
-            opacity: 0.4; /* เพิ่มความเข้มหมอกนิดหน่อยให้เห็นชัดบนปราสาท */
+            opacity: 0.4;
         }
         .fog-img-2 {
             background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog2.png') repeat-x;
@@ -177,7 +177,6 @@ html_code = """
             border-left: 3px solid var(--primary);
             padding-left: 15px;
             background: linear-gradient(90deg, rgba(255,0,0,0.1), transparent);
-            /* เพิ่มพื้นหลังจางๆ ให้ข้อความอ่านง่ายขึ้นบนรูปปราสาท */
             background-color: rgba(0, 0, 0, 0.4); 
             padding: 10px 15px;
             border-radius: 0 10px 10px 0;
@@ -194,10 +193,9 @@ html_code = """
         /* --- Services Section --- */
         .services-section {
             padding: 80px 20px;
-            /* ปรับพื้นหลังให้เข้มขึ้น เพื่อบังรูปปราสาทในส่วนนี้ */
             background: rgba(5, 0, 0, 0.85);
             text-align: center;
-            backdrop-filter: blur(5px); /* เบลอฉากหลังนิดหน่อย */
+            backdrop-filter: blur(5px);
         }
         .section-header {
             font-family: 'Cinzel', serif;
@@ -217,7 +215,7 @@ html_code = """
         }
 
         .service-card {
-            background: rgba(20, 0, 0, 0.8); /* พื้นหลังการ์ดเข้มๆ โปร่งแสงนิดๆ */
+            background: rgba(20, 0, 0, 0.8);
             padding: 30px;
             border: 1px solid #333;
             border-radius: 10px;
