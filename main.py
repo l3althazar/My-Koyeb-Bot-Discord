@@ -65,9 +65,9 @@ try:
         KEY_DEBUG_INFO = f"{start_char}...{end_char} (ยาว: {k_len} ตัวอักษร)"
         
         genai.configure(api_key=api_key)
-        # ✅ ใช้โมเดล gemini-1.5-flash
-        # เพิ่ม tools='google_search_retrieval' เพื่อเปิดใช้ Google Search
-        model = genai.GenerativeModel('gemini-2.5-flash', tools='google_search_retrieval')
+        # ✅ ใช้โมเดล gemini-2.5-flash
+        # เพิ่ม tools='google_search' เพื่อเปิดใช้ Google Search
+        model = genai.GenerativeModel('gemini-2.5-flash', tools='google_search')
         AI_STATUS = "✅ พร้อมใช้งาน"
 except Exception as e:
     AI_STATUS = f"💥 Error: {str(e)}"
