@@ -55,7 +55,7 @@ try:
         
         genai.configure(api_key=api_key)
         # ✅ ใช้โมเดล gemini-1.5-flash
-        model = genai.GenerativeModel('gemini-1.5-flash-001')
+        model = genai.GenerativeModel('gemini-pro')
         AI_STATUS = "✅ พร้อมใช้งาน"
 except Exception as e:
     AI_STATUS = f"💥 Error: {str(e)}"
@@ -250,8 +250,15 @@ async def fortune(interaction: discord.Interaction):
 @app_commands.checks.has_permissions(manage_messages=True)
 async def clear_chat(interaction: discord.Interaction, amount: int):
     if amount > 100: return await interaction.response.send_message("❌ สูงสุด 100", ephemeral=True)
+    
+    # ✅ 1. บอก Discord ให้รอก่อน (จะขึ้นว่า Bot is thinking...)
+    await interaction.response.defer(ephemeral=True) 
+    
+    # 2. เริ่มลบข้อความ
     await interaction.channel.purge(limit=amount)
-    await interaction.response.send_message("🧹 เรียบร้อย!", ephemeral=True)
+    
+    # 3. ส่งข้อความแจ้งเมื่อเสร็จ (ใช้ followup แทน response)
+    await interaction.followup.send("🧹 เรียบร้อย!", ephemeral=True)
 
 # 5. ล้างห้อง
 @bot.tree.command(name="ล้างห้อง", description="⚠️ Nuke Channel")
@@ -269,6 +276,19 @@ async def nuke_channel(interaction: discord.Interaction):
     btn.callback = confirm
     view.add_item(btn)
     await interaction.response.send_message("⚠️ **คำเตือน:** ห้องนี้จะถูกลบและสร้างใหม่ ข้อความทั้งหมดจะหายไป!", view=view, ephemeral=True)
+
+# 6. เช็คโมเดลที่มี (Add-on)
+@bot.tree.command(name="เช็คโมเดล", description="📂 ดูว่าบัญชีนี้ใช้โมเดลอะไรได้บ้าง")
+async def list_models(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    try:
+        msg = "**รายชื่อโมเดลที่ใช้ได้:**\n"
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                msg += f"- `{m.name}`\n"
+        await interaction.followup.send(msg)
+    except Exception as e:
+        await interaction.followup.send(f"❌ เช็คไม่ได้: {e}")
 
 @bot.event
 async def on_ready():
