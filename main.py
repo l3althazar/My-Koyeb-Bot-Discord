@@ -34,7 +34,7 @@ ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"
 ROLE_WWM = "ข้าคือจอมยุทธ์เด๊ะ"
 ALLOWED_CHANNEL_FORTUNE = "ห้องเช็คดวง"
 
-# 🆕 รายชื่อยศสายอาชีพ (ต้องสร้างใน Discord ให้ชื่อตรงเป๊ะๆ)
+# 🆕 รายชื่อยศสายอาชีพ
 ROLE_DPS = "DPS ⚔️"
 ROLE_HEALER = "หมอ💉🩺"
 ROLE_TANK = "แทงค์ 🛡️"
@@ -96,7 +96,7 @@ class GameSelect(discord.ui.Select):
         await interaction.response.defer()
         self.view.stop()
 
-# 🆕 ตัวเลือกสายอาชีพ
+# ตัวเลือกสายอาชีพ
 class ClassSelect(discord.ui.Select):
     def __init__(self):
         options = [
@@ -130,7 +130,7 @@ class TicketButton(discord.ui.View):
     async def start_interview(self, channel, user, guild):
         def check(m): return m.author == user and m.channel == channel
         data = {}
-        icon_prefix = "" # เก็บไอคอนนำหน้าชื่อ (เช่น ⚔️)
+        icon_prefix = "" 
 
         try:
             await channel.send(f"{user.mention} **ยินดีต้อนรับครับ!**")
@@ -143,7 +143,7 @@ class TicketButton(discord.ui.View):
             await channel.send(embed=discord.Embed(title="2. อายุเท่าไหร่?", color=0x3498db))
             data["age"] = (await bot.wait_for("message", check=check, timeout=300)).content
 
-            # 3. เกม
+            # 3. เลือกเกม
             view_game = discord.ui.View()
             select_game = GameSelect()
             view_game.add_item(select_game)
@@ -156,28 +156,29 @@ class TicketButton(discord.ui.View):
 
             # ถ้าเลือกเกม WWM
             if data["game"] == "Where Winds Meet":
-                # 3.1 ถามชื่อตัวละคร
+                # 3.1 ถามชื่อตัวละคร (ยังไม่ให้ยศ)
                 await channel.send(embed=discord.Embed(title="⚔️ ชื่อตัวละครของคุณคือ?", color=0xe74c3c))
                 data["char_name"] = (await bot.wait_for("message", check=check, timeout=300)).content
                 
-                # ให้ยศเกม WWM
-                role_wwm = discord.utils.get(guild.roles, name=ROLE_WWM)
-                if role_wwm: await user.add_roles(role_wwm)
-
-                # 🆕 3.2 ถามสายอาชีพ (Class)
+                # 3.2 ถามสายอาชีพเป็นอย่างสุดท้าย
                 view_class = discord.ui.View()
                 select_class = ClassSelect()
                 view_class.add_item(select_class)
                 await channel.send(embed=discord.Embed(title="🛡️ เล่นสายอาชีพไหน?", color=0xe74c3c), view=view_class)
                 await view_class.wait()
                 
+                # --- 🔥 เริ่มกระบวนการมอบยศทีเดียวตรงนี้ 🔥 ---
+                
+                # 1. มอบยศเกม WWM
+                role_wwm = discord.utils.get(guild.roles, name=ROLE_WWM)
+                if role_wwm: await user.add_roles(role_wwm)
+
+                # 2. มอบยศสายอาชีพ
                 if hasattr(select_class, 'selected_value'):
                     cls = select_class.selected_value
                     data["class"] = cls
                     
-                    # Logic ให้ยศและไอคอนตามสาย
                     role_name_to_add = None
-                    
                     if cls == "ดาเมจ":
                         role_name_to_add = ROLE_DPS
                         icon_prefix = "⚔️"
@@ -191,26 +192,25 @@ class TicketButton(discord.ui.View):
                         role_name_to_add = ROLE_HYBRID
                         icon_prefix = "🧬"
                     
-                    # เพิ่มยศสายอาชีพ
                     if role_name_to_add:
                         r = discord.utils.get(guild.roles, name=role_name_to_add)
                         if r: await user.add_roles(r)
 
-            # สรุปและส่ง
+            # สรุปข้อมูล
             embed = discord.Embed(title="✅ สมาชิกใหม่รายงานตัว!", color=0xffd700)
             desc = f"**ชื่อเล่น :** {data['name']}\n**อายุ :** {data['age']}\n**เกมที่เล่น :** {data['game']}"
             if data["char_name"] != "-": 
                 desc += f"\n**ชื่อในเกม :** {data['char_name']}"
-                desc += f"\n**สายอาชีพ :** {data['class']}" # โชว์สายอาชีพด้วย
+                desc += f"\n**สายอาชีพ :** {data['class']}"
             
             embed.description = desc
             if user.avatar: embed.set_thumbnail(url=user.avatar.url)
             embed.set_footer(text=f"แนะนำตัวโดย {user.name}")
 
+            # ส่งลงห้องรวม
             pub_ch = discord.utils.get(guild.text_channels, name=PUBLIC_CHANNEL)
             sent_msg = None
             if pub_ch:
-                # สแกนลบอันเก่า
                 async for msg in pub_ch.history(limit=50):
                     if msg.author == bot.user and msg.embeds and msg.embeds[0].footer.text == f"แนะนำตัวโดย {user.name}":
                         try: await msg.delete()
@@ -223,9 +223,8 @@ class TicketButton(discord.ui.View):
             role_ver = discord.utils.get(guild.roles, name=ROLE_VERIFIED)
             if role_ver: await user.add_roles(role_ver)
             
-            # 🆕 เปลี่ยนชื่อดิสคอร์ด (ใส่ไอคอน + ชื่อเดิม + ชื่อเล่น)
+            # เปลี่ยนชื่อดิสคอร์ด
             try:
-                # ถ้ามีไอคอน (เล่น WWM) ให้ใส่ ถ้าไม่มีก็ใส่แค่ชื่อเล่น
                 new_nick = ""
                 if icon_prefix:
                     new_nick = f"{icon_prefix} {user.name} ({data['name']})"
@@ -234,7 +233,7 @@ class TicketButton(discord.ui.View):
                 
                 await user.edit(nick=new_nick)
             except Exception as e:
-                logger.warning(f"เปลี่ยนชื่อไม่ได้ (อาจเพราะยศบอทต่ำกว่าคนนี้): {e}")
+                logger.warning(f"เปลี่ยนชื่อไม่ได้: {e}")
                 await channel.send(f"⚠️ บอทเปลี่ยนชื่อให้ไม่ได้ (ยศบอทต่ำกว่าท่าน) แต่บันทึกข้อมูลแล้วครับ")
 
             view_back = discord.ui.View()
@@ -246,10 +245,14 @@ class TicketButton(discord.ui.View):
             await channel.delete()
         except: await channel.delete()
 
+# --- Force Sync Command ---
 @bot.command()
 async def sync(ctx):
-    synced = await bot.tree.sync()
-    await ctx.send(f"✅ Synced {len(synced)} commands.")
+    # บังคับซิงค์ทันที
+    bot.tree.clear_commands(guild=ctx.guild)
+    bot.tree.copy_global_to(guild=ctx.guild)
+    synced = await bot.tree.sync(guild=ctx.guild)
+    await ctx.send(f"✅ **Force Sync เรียบร้อย!** เจอทั้งหมด {len(synced)} คำสั่ง")
 
 @bot.command()
 async def setup(ctx):
@@ -257,7 +260,7 @@ async def setup(ctx):
     await refresh_setup_msg(ctx.channel)
 
 # ==========================================
-# 🔥 5. Slash Commands
+# 🔥 Slash Commands
 # ==========================================
 
 # 1. เช็คระบบ
@@ -279,7 +282,7 @@ async def list_models(interaction: discord.Interaction):
         await interaction.followup.send(msg[:1900])
     except: await interaction.followup.send("❌ เช็คไม่ได้")
 
-# 3. ถาม AI (เวลาไทย)
+# 3. ถาม AI
 @bot.tree.command(name="ถาม", description="🤖 คุยกับท่านจอมยุทธ์ (AI)")
 async def ask_ai(interaction: discord.Interaction, question: str):
     await interaction.response.defer()
@@ -294,7 +297,7 @@ async def ask_ai(interaction: discord.Interaction, question: str):
         await interaction.followup.send(embed=embed)
     except Exception as e: await interaction.followup.send(f"😵 Error: {e}", ephemeral=True)
 
-# 4. ดูดวง (Full Option)
+# 4. ดูดวง
 @bot.tree.command(name="ดูดวง", description="🔮 เช็คดวงกาชา/Tune")
 async def fortune(interaction: discord.Interaction):
     if interaction.channel.name != ALLOWED_CHANNEL_FORTUNE:
