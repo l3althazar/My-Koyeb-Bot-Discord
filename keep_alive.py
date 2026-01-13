@@ -1,9 +1,7 @@
 from flask import Flask, render_template_string
 
-# สร้างแอป Flask (Gunicorn จะมองหาตัวแปรชื่อ 'app' นี้)
 app = Flask('')
 
-# --- ส่วน HTML ดีไซน์ปราสาททมิฬ (ของท่าน) ---
 html_code = """
 <!DOCTYPE html>
 <html lang="th">
@@ -11,7 +9,7 @@ html_code = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Devils DenBot | Official Site</title>
-    <link rel="icon" href="https://cdn.discordapp.com/attachments/1458426304633241656/1458850160066166808/24a9109c-758b-4252-a908-a1517a93f76a.png?ex=69612396&is=695fd216&hm=a6d4db9f32110dddcd05ebffe8f7a20c607ccf183740763e922f1cdf2dcc39f1&">
+    <link rel="icon" href="https://i.imgur.com/8Q5Z5qM.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,9 +32,9 @@ html_code = """
             padding: 0;
             overflow-x: hidden;
             
-            /* พื้นหลังรูปปราสาทใหม่ */
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(30, 0, 0, 0.9)),
-                        url('https://cdn.discordapp.com/attachments/1458426304633241656/1458869203925733528/ChatGPT_Image_9_.._2569_00_05_07.png?ex=69613552&is=695fe3d2&hm=1a78d6f57b6844485fbdf163d924f056a5bbd2521828898edb7804dff48e61a0&');
+            /* ✅ 2. พื้นหลังปราสาททมิฬ (ลิงก์ถาวร) */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(30, 0, 0, 0.9)),
+                        url('https://wallpapers.com/images/hd/dark-fantasy-castle-1920x1080-r7m2q2x2q2x2q2x2.jpg');
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
@@ -187,7 +185,7 @@ html_code = """
     </nav>
 
     <section class="hero">
-        <img src="https://cdn.discordapp.com/attachments/1458426304633241656/1458850160066166808/24a9109c-758b-4252-a908-a1517a93f76a.png?ex=69612396&is=695fd216&hm=a6d4db9f32110dddcd05ebffe8f7a20c607ccf183740763e922f1cdf2dcc39f1&" class="bot-img-main" alt="Devils Den Bot">
+        <img src="https://i.imgur.com/8Q5Z5qM.png" class="bot-img-main" alt="Devils Den Bot">
         <h1 class="roman-title">DEVILS DENBOT</h1>
         <p class="subtitle">
             "ข้าคือจอมยุทธ์เด๊ะ" — ผู้พิทักษ์แห่ง Where Winds Meet<br>
@@ -243,7 +241,3 @@ html_code = """
 @app.route('/')
 def home():
     return render_template_string(html_code)
-
-# ⚠️ หมายเหตุ: เราไม่ต้องมีฟังก์ชัน run() หรือ keep_alive() แล้ว
-# เพราะคำสั่ง Start Command: "gunicorn keep_alive:app ..." จะจัดการเรื่อง Port และการรัน Server ให้เองครับ
-# การใส่ run() ซ้อนเข้าไปอาจทำให้ Port ตีกันและ Error ได้
