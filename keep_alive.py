@@ -8,231 +8,235 @@ html_code = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devils DenBot | Official Site</title>
-    <link rel="icon" href="https://i.imgur.com/8Q5Z5qM.png">
+    <title>Devils DenBot | The Ultimate Guardian</title>
+    <link rel="icon" href="https://cdn.discordapp.com/attachments/1459905133084410020/1461017854873698535/24a9109c-758b-4252-a908-a1517a93f76a.png?ex=69690669&is=6967b4e9&hm=aa4ab1269d3a96bed6c4cc28c80f7a39e63848b8951913de7419d96dd140c7a39e63848b8951913de7419d96dd140c7a39e63848b8951913de7419d96dd140c7a8&">
     
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --primary: #ff0000;
-            --dark-red: #8a0000;
-            --bg: #050505;
-            --text: #e0e0e0;
+            --primary: #c00000;       /* Crimson Red */
+            --accent: #d4af37;        /* Luxury Gold */
+            --bg-dark: #0a0a0a;
+            --text-main: #ffffff;
+            --text-muted: #b0b0b0;
+            --glass: rgba(0, 0, 0, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Kanit', sans-serif;
-            margin: 0;
-            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Prompt', sans-serif;
             overflow-x: hidden;
-            
-            /* ✅ 2. พื้นหลังปราสาททมิฬ (ลิงก์ถาวร) */
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(30, 0, 0, 0.9)),
-                        url('https://wallpapers.com/images/hd/dark-fantasy-castle-1920x1080-r7m2q2x2q2x2q2x2.jpg');
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-attachment: fixed;
-            background-size: cover;
+            line-height: 1.6;
         }
 
-        .fog-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: -1; pointer-events: none;
+        /* Background Setup */
+        .bg-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: url('https://cdn.discordapp.com/attachments/1459905133084410020/1461017831310098563/ChatGPT_Image_9_.._2569_00_05_07.png?ex=69690663&is=6967b4e3&hm=f13d1d509c1ebe2e010d17ee67532735bea7375eed6bf0d70193317a43d37c46&') no-repeat center center/cover;
         }
-        .fog-img {
-            position: absolute; height: 100vh; width: 300vw;
-            background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
-            background-size: contain; animation: fog 60s linear infinite; opacity: 0.3;
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.9) 100%);
         }
-        .fog-img-2 {
-            background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog2.png') repeat-x;
-            background-size: contain; animation: fog 40s linear infinite;
-            z-index: -1; top: 30%; opacity: 0.2;
-        }
-        @keyframes fog { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200vw, 0, 0); } }
 
-        .navbar {
-            background: rgba(10, 0, 0, 0.95); padding: 15px 40px;
+        /* Navbar */
+        nav {
             display: flex; justify-content: space-between; align-items: center;
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); backdrop-filter: blur(10px);
+            padding: 20px 50px;
+            position: fixed; width: 100%; top: 0; z-index: 1000;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .brand {
+            font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700;
+            color: var(--text-main); letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .brand span { color: var(--primary); }
+        
+        .nav-links a {
+            color: var(--text-muted); text-decoration: none; margin-left: 30px;
+            font-size: 0.9rem; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .nav-links a:hover { color: var(--accent); }
+        .btn-main {
+            padding: 10px 25px; background: transparent; border: 1px solid var(--accent);
+            color: var(--accent); text-decoration: none; border-radius: 2px;
+            font-weight: 600; transition: all 0.3s ease;
+            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
+        }
+        .btn-main:hover {
+            background: var(--accent); color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
         }
 
-        .brand-container { display: flex; align-items: center; gap: 15px; }
-        .logo-text { font-family: 'Cinzel', serif; font-size: 1.5em; color: var(--primary); font-weight: bold; letter-spacing: 2px; }
-
-        .status-badge-nav {
-            font-family: 'Kanit', sans-serif; font-size: 0.8em;
-            background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00;
-            padding: 2px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px;
-            text-transform: uppercase; font-weight: bold;
-        }
-        .status-dot-nav {
-            width: 8px; height: 8px; background: #00ff00; border-radius: 50%;
-            box-shadow: 0 0 5px #00ff00; animation: pulse 2s infinite;
-        }
-
-        .nav-links a { color: #aaa; text-decoration: none; margin-left: 25px; font-weight: 500; transition: 0.3s; }
-        .nav-links a:hover { color: white; text-shadow: 0 0 5px white; }
-
-        .btn-invite {
-            background: var(--primary); color: white !important;
-            padding: 8px 20px; border-radius: 5px; font-weight: bold; border: 1px solid var(--primary);
-        }
-        .btn-invite:hover { background: black; color: var(--primary) !important; box-shadow: 0 0 15px var(--primary); }
-
+        /* Hero Section */
         .hero {
-            min-height: 90vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center; padding-top: 100px;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 0 20px;
+        }
+        
+        .profile-container {
+            position: relative; margin-bottom: 30px;
+        }
+        .bot-img {
+            width: 180px; height: 180px; border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 60px rgba(192, 0, 0, 0.3);
+            animation: pulse-glow 3s infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 20px rgba(192, 0, 0, 0.2); }
+            to { box-shadow: 0 0 50px rgba(192, 0, 0, 0.6); transform: scale(1.02); }
         }
 
-        .bot-img-main {
-            width: 220px; height: 220px; border-radius: 50%;
-            border: 4px solid #000; outline: 4px solid var(--primary);
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.4); object-fit: cover;
-            animation: float 4s ease-in-out infinite; margin-bottom: 20px; background-color: #000;
+        h1 {
+            font-family: 'Cinzel', serif; font-size: 3.5rem; margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #b0b0b0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-
-        h1.roman-title {
-            font-family: 'Cinzel', serif; font-size: 5em; margin: 0; color: #000000;
-            -webkit-text-stroke: 2px var(--primary); text-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
-            text-transform: uppercase; letter-spacing: 5px; line-height: 1.1;
+        
+        .tagline {
+            font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px;
+            font-weight: 300; letter-spacing: 1px; max-width: 600px;
         }
+        .highlight { color: var(--primary); font-weight: 500; }
 
-        p.subtitle {
-            font-size: 1.2em; color: #ccc; max-width: 700px; margin-top: 15px;
-            border-left: 3px solid var(--primary); padding-left: 15px;
-            background: linear-gradient(90deg, rgba(255,0,0,0.1), transparent);
-            background-color: rgba(0, 0, 0, 0.5); padding: 10px 15px;
-            border-radius: 0 10px 10px 0; backdrop-filter: blur(3px);
+        .stats-bar {
+            display: flex; gap: 40px; margin-top: 40px;
+            padding: 20px 40px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
         }
-
-        .stats-row { display: flex; gap: 40px; margin-top: 40px; }
         .stat-item { text-align: center; }
-        .stat-num { font-size: 2.5em; font-weight: bold; color: white; text-shadow: 0 0 10px var(--primary); }
-        .stat-label { color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; }
+        .stat-val { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--text-main); }
+        .stat-label { font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
 
-        .services-section {
-            padding: 210px 20px; background: rgba(5, 0, 0, 0.9);
-            text-align: center; backdrop-filter: blur(5px);
+        /* Features */
+        .features {
+            padding: 100px 50px;
+            max-width: 1200px; margin: 0 auto;
         }
-        .section-header {
-            font-family: 'Cinzel', serif; font-size: 2.5em; color: var(--primary);
-            margin-bottom: 50px; text-transform: uppercase; text-shadow: 0 0 10px var(--primary);
+        .section-title {
+            font-family: 'Cinzel', serif; text-align: center; font-size: 2rem;
+            color: var(--text-main); margin-bottom: 60px;
+            position: relative; display: inline-block; left: 50%; transform: translateX(-50%);
+        }
+        .section-title::after {
+            content: ''; display: block; width: 60px; height: 2px;
+            background: var(--primary); margin: 15px auto 0;
         }
 
-        .services-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px; max-width: 1100px; margin: 0 auto;
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
         }
-
-        .service-card {
-            background: rgba(20, 0, 0, 0.8); padding: 30px;
-            border: 1px solid #333; border-radius: 10px; transition: 0.3s;
+        .card {
+            background: linear-gradient(145deg, rgba(20,20,20,0.6), rgba(10,10,10,0.8));
+            padding: 40px 30px; border: 1px solid var(--glass-border);
+            border-radius: 4px; transition: 0.4s;
             position: relative; overflow: hidden;
         }
-        .service-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: var(--primary); transform: scaleX(0); transition: 0.3s;
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2); border-color: var(--primary); }
-        .service-card:hover::before { transform: scaleX(1); }
-        
-        .service-icon { font-size: 2.5em; color: var(--primary); margin-bottom: 15px; }
-        .service-card h3 { color: white; margin-bottom: 10px; font-family: 'Cinzel', serif; }
-        .service-card p { color: #bbb; font-size: 0.95em; line-height: 1.6; }
+        .card i { font-size: 2rem; color: var(--primary); margin-bottom: 20px; }
+        .card h3 { font-family: 'Cinzel', serif; margin-bottom: 15px; color: var(--text-main); font-size: 1.2rem; }
+        .card p { font-size: 0.9rem; color: var(--text-muted); font-weight: 300; }
 
         footer {
-            padding: 30px; text-align: center; border-top: 1px solid #333; font-size: 0.9em; color: #777;
-            background: #000;
+            text-align: center; padding: 40px; color: #555; font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.05); background: #050505;
         }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
+        /* Mobile */
         @media (max-width: 768px) {
-            h1.roman-title { font-size: 3em; -webkit-text-stroke: 1px var(--primary); }
-            .navbar { padding: 15px; } .nav-links { display: none; }
-            .stats-row { flex-direction: column; gap: 20px; }
+            h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .stats-bar { flex-direction: column; gap: 15px; border-radius: 10px; }
+            nav { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="fog-container">
-        <div class="fog-img"></div>
-        <div class="fog-img-2"></div>
-    </div>
+    <div class="bg-layer"></div>
+    <div class="overlay"></div>
 
-    <nav class="navbar">
-        <div class="brand-container">
-            <div class="logo-text">DEVILS DEN</div>
-            <div class="status-badge-nav"><div class="status-dot-nav"></div> Online</div>
-        </div>
+    <nav>
+        <div class="brand">DEVILS <span>DEN</span></div>
         <div class="nav-links">
             <a href="#">Home</a>
-            <a href="#services">Services</a>
+            <a href="#features">Features</a>
             <a href="https://www.facebook.com/l3althazar.bas" target="_blank">Contact</a>
-            <a href="https://discord.com/oauth2/authorize?client_id=1457301588937801739&permissions=8&integration_type=0&scope=bot" class="btn-invite" target="_blank">INVITE BOT</a>
+            <a href="https://discord.com/oauth2/authorize?client_id=1457301588937801739&permissions=8&integration_type=0&scope=bot" class="btn-main">Invite Bot</a>
         </div>
     </nav>
 
     <section class="hero">
-        <img src="https://i.imgur.com/8Q5Z5qM.png" class="bot-img-main" alt="Devils Den Bot">
-        <h1 class="roman-title">DEVILS DENBOT</h1>
-        <p class="subtitle">
-            "ข้าคือจอมยุทธ์เด๊ะ" — ผู้พิทักษ์แห่ง Where Winds Meet<br>
-            ระบบรับน้อง • เสี่ยงดวงกาชา • มินิเกม RPG
+        <div class="profile-container">
+            <img src="https://cdn.discordapp.com/attachments/1459905133084410020/1461017854873698535/24a9109c-758b-4252-a908-a1517a93f76a.png?ex=69690669&is=6967b4e9&hm=aa4ab1269d3a96bed6c4cc28c80f7a39e63848b8951913de7419d96dd140c7a39e63848b8951913de7419d96dd140c7a39e63848b8951913de7419d96dd140c7a39e63848b8951913de7419d96dd140c7a8&" alt="Devils Den Bot" class="bot-img">
+        </div>
+        
+        <h1>DEVILS DENBOT</h1>
+        <p class="tagline">
+            "ข้าคือจอมยุทธ์เด๊ะ" — ผู้พิทักษ์แห่ง <span class="highlight">Where Winds Meet</span><br>
+            ระบบจัดการกิลด์ครบวงจร ด้วยมาตรฐานระดับสากล
         </p>
 
-        <div class="stats-row">
-            <div class="stat-item"><div class="stat-num">1+</div><div class="stat-label">SERVERS</div></div>
-            <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">UPTIME</div></div>
-            <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">FUN</div></div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-val">24/7</div>
+                <div class="stat-label">Online</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">RPG</div>
+                <div class="stat-label">Systems</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">100%</div>
+                <div class="stat-label">Secure</div>
+            </div>
         </div>
     </section>
 
-    <section id="services" class="services-section">
-        <div class="section-header">Services</div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-dice-d20"></i></div>
-                <h3>SYSTEM RPG</h3>
-                <p>ระบบสุ่มดวง กาชา ตีบวก และมินิเกมต่อสู้ (Duel) เพื่อความบันเทิงในกิลด์</p>
+    <section id="features" class="features">
+        <h2 class="section-title">CORE FEATURES</h2>
+        <div class="grid">
+            <div class="card">
+                <i class="fas fa-scroll"></i>
+                <h3>Advanced Queue</h3>
+                <p>ระบบจัดคิวลงดันเจี้ยนและบอสโลกแบบ Real-time พร้อมปุ่มกดที่ใช้งานง่าย ไม่ต้องพิมพ์คำสั่ง</p>
             </div>
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-user-shield"></i></div>
-                <h3>VERIFY & ROLES</h3>
-                <p>ระบบรับน้อง ยืนยันตัวตนอัตโนมัติ เปลี่ยนชื่อ และแจกยศสมาชิกใหม่อย่างรวดเร็ว</p>
+            <div class="card">
+                <i class="fas fa-gavel"></i>
+                <h3>Approval System</h3>
+                <p>ระบบใบลาที่มีมาตรฐาน พร้อมฟังก์ชันอนุมัติสำหรับ Admin เพื่อความเป็นระเบียบของกิลด์</p>
             </div>
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-music"></i></div>
-                <h3>MUSIC & CHILL</h3>
-                <p>หน้าเว็บมาพร้อมเพลง Gothic Theme สร้างบรรยากาศเข้มขลังให้กับการใช้งาน</p>
+            <div class="card">
+                <i class="fas fa-dice-d20"></i>
+                <h3>Fortune & RPG</h3>
+                <p>ระบบเสี่ยงดวงทำนายโชคชะตา และมินิเกมที่จะทำให้สมาชิกในกิลด์สนุกสนานไม่มีเบื่อ</p>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>© 2026 Devils DenBot. All rights reserved.</p>
-        <p style="font-size: 0.8em; color: #555;">Design by ท่านจอมยุทธ์</p>
+        <p>© 2026 Devils DenBot. All Rights Reserved. | Designed by ท่านจอมยุทธ์</p>
     </footer>
-
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 2000;">
-        <button onclick="document.getElementById('bgMusic').play()" style="background:var(--primary); border:none; color:white; padding:10px 15px; border-radius:50px; cursor:pointer; box-shadow: 0 0 10px red;">
-            <i class="fas fa-play"></i> MUSIC
-        </button>
-    </div>
-    <audio id="bgMusic" loop>
-        <source src="https://pixabay.com/music/download/story-epic-cinematic-trailer-115966.mp3" type="audio/mpeg">
-    </audio>
 
 </body>
 </html>
