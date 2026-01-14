@@ -33,6 +33,9 @@ PUBLIC_CHANNEL = "ห้องแนะนำตัว"
 CHANNEL_LEAVE = "ห้องแจ้งลา"       
 ALLOWED_CHANNEL_FORTUNE = "ห้องเช็คดวง"
 
+# 🔒 เพิ่มตัวแปรยศ Admin สำหรับตรวจสอบสิทธิ์
+ROLE_ADMIN_CHECK = "‹ 𝑆𝑦𝑠𝑡𝑒𝑚 𝐴𝑑𝑚𝑖𝑛 ⚖️ ›"
+
 ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"
 ROLE_WWM = "ข้าคือจอมยุทธ์เด๊ะ"
 
@@ -104,6 +107,41 @@ async def refresh_leave_msg(guild):
     embed = discord.Embed(title="📢 แจ้งลาหยุด / ลากิจกรรม", description="กดปุ่มด้านล่างเพื่อกรอกแบบฟอร์มใบลาครับ 👇", color=0xe74c3c)
     await channel.send(embed=embed, view=LeaveButtonView())
 
+# 🔥 [เพิ่มใหม่] Class สำหรับปุ่มอนุมัติ (ตรวจสอบยศ Admin)
+class LeaveApprovalView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None) # ปุ่มอยู่ถาวร
+
+    # ฟังก์ชันตรวจสอบสิทธิ์ก่อนกดปุ่ม
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # เช็คว่าคนกดมียศตามที่กำหนดหรือไม่
+        has_role = discord.utils.get(interaction.user.roles, name=ROLE_ADMIN_CHECK)
+        if has_role:
+            return True
+        else:
+            await interaction.response.send_message(f"⛔ เจ้าไม่มีสิทธิ์! เฉพาะ **{ROLE_ADMIN_CHECK}** เท่านั้น", ephemeral=True)
+            return False
+
+    @discord.ui.button(label="อนุมัติ", style=discord.ButtonStyle.success, custom_id="leave_approve", emoji="✅")
+    async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.process_leave(interaction, "✅ อนุมัติแล้ว", 0x2ecc71) # สีเขียว
+
+    @discord.ui.button(label="ไม่อนุมัติ", style=discord.ButtonStyle.danger, custom_id="leave_deny", emoji="❌")
+    async def deny_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.process_leave(interaction, "❌ ไม่อนุมัติ", 0xe74c3c) # สีแดง
+
+    async def process_leave(self, interaction: discord.Interaction, status_text, color_code):
+        # ดึง Embed เดิมมาแก้ไข
+        original_embed = interaction.message.embeds[0]
+        new_embed = original_embed.copy()
+        new_embed.color = color_code
+        
+        # แก้ไข Field สุดท้าย (ช่องสถานะ)
+        new_embed.set_field_at(index=3, name="📋 สถานะ", value=f"**{status_text}** โดย {interaction.user.mention}", inline=False)
+        
+        # ลบปุ่มออกและอัปเดตข้อความ
+        await interaction.response.edit_message(embed=new_embed, view=None)
+
 class LeaveModal(discord.ui.Modal, title="📜 แบบฟอร์มขอลา (Leave Form)"):
     char_name = discord.ui.TextInput(label="ชื่อตัวละครในเกม", placeholder="ระบุชื่อตัวละครของท่าน...", required=True)
     leave_type = discord.ui.TextInput(label="หัวข้อการลา", placeholder="เช่น ลากิจ, ลาป่วย, ขาด War", required=True)
@@ -127,17 +165,23 @@ class LeaveModal(discord.ui.Modal, title="📜 แบบฟอร์มขอล
         leave_data.append(entry)
         save_json(LEAVE_FILE, leave_data)
 
-        embed = discord.Embed(title="📩 มีสาส์นขอลาหยุด!", color=0xff9900)
-        # ✅ ส่วนนี้ยังมีรูปโปรไฟล์อยู่ (ตามที่ท่านต้องการ)
+        # 🔥 [แก้ไข] เปลี่ยนสีเป็นเหลือง (รออนุมัติ) และเพิ่ม Field สถานะ
+        embed = discord.Embed(title="📩 มีสาส์นขอลาหยุด! (รออนุมัติ)", color=0xf1c40f)
         embed.set_thumbnail(url=interaction.user.avatar.url if interaction.user.avatar else None)
         
         embed.add_field(name="👤 จอมยุทธ์", value=f"ชื่อ : {self.char_name.value}", inline=False)
         embed.add_field(name="📌 ประเภท", value=self.leave_type.value, inline=False)
         embed.add_field(name="📅 วันที่/เวลา", value=self.leave_date.value, inline=False)
-        embed.add_field(name="📝 เหตุผล", value=self.reason.value or "-", inline=False)
+        
+        # เพิ่มสถานะเริ่มต้น (Index 3)
+        embed.add_field(name="📋 สถานะ", value="⏳ **รอการตรวจสอบ**", inline=False)
+        
+        embed.description = f"**📝 เหตุผล:** {self.reason.value or '-'}"
         embed.set_footer(text=f"ยื่นเรื่องเมื่อ: {timestamp}")
 
-        await interaction.channel.send(content=f"**ผู้ยื่นเรื่อง:** {interaction.user.mention}", embed=embed)
+        # 🔥 [แก้ไข] ส่ง View (ปุ่มอนุมัติ) ไปด้วย
+        await interaction.channel.send(content=f"**ผู้ยื่นเรื่อง:** {interaction.user.mention}", embed=embed, view=LeaveApprovalView())
+        
         msg = await interaction.followup.send(f"✅ ส่งใบลาเรียบร้อยแล้วครับ!", ephemeral=True)
         await refresh_leave_msg(interaction.guild)
         await asyncio.sleep(3) 
@@ -443,8 +487,12 @@ async def nuke_channel(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     logger.info(f"🚀 Logged in as {bot.user}")
+    
+    # ✅ เพิ่ม View ทั้งหมดลงใน Persistent View เพื่อให้ทำงานได้หลังรีสตาร์ท
     bot.add_view(TicketButton())
     bot.add_view(LeaveButtonView())
+    bot.add_view(LeaveApprovalView()) 
+
     for guild in bot.guilds:
         await refresh_leave_msg(guild)
 
