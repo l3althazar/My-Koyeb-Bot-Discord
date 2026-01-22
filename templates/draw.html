@@ -203,9 +203,10 @@
             <div class="logo-sub">Official Site</div>
         </div>
         <div class="nav-right">
-            <div class="nav-links">
-                <a href="index.html" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">HOME</a>
-                <a href="https://www.facebook.com/l3althazar.bas" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">CONTACT</a>
+           <div class="nav-links">
+                <a href="/" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">HOME</a>
+
+                <a href="https://www.facebook.com/..." ...>CONTACT</a>
             </div>
             <div class="audio-toggle-btn" id="audio-toggle" onclick="toggleMusic()" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
                 <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
@@ -265,10 +266,10 @@
         </div>
     </footer>
 
-        <audio id="bg-music" src="/static/sound/bg.mp3" loop></audio>
-        <audio id="sfx-spin" src="/static/sound/spin.mp3" loop></audio> 
-        <audio id="sfx-cut" src="/static/sound/cut.mp3"></audio>
-        <audio id="sfx-win" src="/static/sound/win.mp3"></audio>
+    <audio id="bg-music" src="/static/sound/bg.mp3" loop></audio>
+    <audio id="sfx-spin" src="/static/sound/spin.mp3" loop></audio> 
+    <audio id="sfx-cut" src="/static/sound/cut.mp3"></audio>
+    <audio id="sfx-win" src="/static/sound/win.mp3"></audio>
 
     <script>
         // --- BASIC JS ---
@@ -445,13 +446,13 @@
                 ctx.translate(centerX, centerY);
 
                 if (numSegments === 1) {
-                     ctx.fillStyle = "#fff";
-                     ctx.font = "bold 40px 'Kanit', sans-serif";
-                     ctx.textAlign = "center";
-                     ctx.textBaseline = "middle";
-                     ctx.shadowColor = "black";
-                     ctx.shadowBlur = 10;
-                     ctx.fillText(items[i], 0, -50); 
+                      ctx.fillStyle = "#fff";
+                      ctx.font = "bold 40px 'Kanit', sans-serif";
+                      ctx.textAlign = "center";
+                      ctx.textBaseline = "middle";
+                      ctx.shadowColor = "black";
+                      ctx.shadowBlur = 10;
+                      ctx.fillText(items[i], 0, -50); 
                 } else {
                     ctx.rotate(angle + arcSize / 2);
                     ctx.textAlign = "right";
