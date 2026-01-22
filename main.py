@@ -9,8 +9,11 @@ import random
 import logging
 import google.generativeai as genai
 
+# 🔥 1. เพิ่ม import keep_alive (สำคัญมากถ้าจะเอาขึ้น Server)
+from keep_alive import keep_alive 
+
 # ==========================================
-# 📝 1. ตั้งค่าระบบ Log
+# 📝 2. ตั้งค่าระบบ Log
 # ==========================================
 logging.basicConfig(
     level=logging.INFO,
@@ -27,14 +30,14 @@ intents.members = True
 bot = commands.Bot(command_prefix='-', intents=intents)
 
 # ==========================================
-# ⚙️ 2. ตั้งค่า
+# ⚙️ 3. ตั้งค่า (Config)
 # ==========================================
 PUBLIC_CHANNEL = "ห้องแนะนำตัว"
-CHANNEL_LEAVE = "ห้องแจ้งลา"       
+CHANNEL_LEAVE = "ห้องแจ้งลา"        
 ALLOWED_CHANNEL_FORTUNE = "ห้องเช็คดวง"
 
-# 🔒 เพิ่มตัวแปรยศ Admin สำหรับตรวจสอบสิทธิ์
-ROLE_ADMIN_CHECK = "‹ 𝑆𝑦𝑠𝑡𝑒𝑚 𝐴𝑑𝑚𝑖𝑛 ⚖️ ›"
+# ⚠️ ข้อควรระวัง: ชื่อยศต้องตรงกับใน Discord เป๊ะๆ 100%
+ROLE_ADMIN_CHECK = "‹ 𝑆𝑦𝑠𝑡𝑒𝑚 𝐴𝑑𝑚𝑖𝑛 ⚖️ ›" 
 
 ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"
 ROLE_WWM = "ข้าคือจอมยุทธ์เด๊ะ"
@@ -47,7 +50,7 @@ ROLE_HYBRID = "ไฮบริด 🧬"
 LEAVE_FILE = "leaves.json"
 
 # ==========================================
-# 🧠 3. AI Setup
+# 🧠 4. AI Setup
 # ==========================================
 GENAI_VERSION = genai.__version__
 BOT_PERSONA = """
@@ -79,7 +82,7 @@ except Exception as e:
     logger.critical(f"🔥 Critical Error loading AI: {e}")
 
 # ==========================================
-# 4. ระบบจัดการไฟล์
+# 5. ระบบจัดการไฟล์
 # ==========================================
 def load_json(filename):
     if not os.path.exists(filename): return []
@@ -93,28 +96,29 @@ def save_json(filename, data):
 leave_data = load_json(LEAVE_FILE)
 
 # ==========================================
-# 5. ระบบ GUI (ใบลา & แนะนำตัว)
+# 6. ระบบ GUI (ใบลา & แนะนำตัว)
 # ==========================================
 
 async def refresh_leave_msg(guild):
     channel = discord.utils.get(guild.text_channels, name=CHANNEL_LEAVE)
-    if not channel: return
+    if not channel: 
+        logger.warning(f"⚠️ ไม่พบห้อง {CHANNEL_LEAVE} ในเซิร์ฟเวอร์ {guild.name}")
+        return
     try:
         async for message in channel.history(limit=20):
             if message.author == bot.user and message.embeds and message.embeds[0].title == "📢 แจ้งลาหยุด / ลากิจกรรม":
                 await message.delete()
-    except: pass
+    except Exception as e: 
+        logger.error(f"Error cleaning leave channel: {e}")
+        
     embed = discord.Embed(title="📢 แจ้งลาหยุด / ลากิจกรรม", description="กดปุ่มด้านล่างเพื่อกรอกแบบฟอร์มใบลาครับ 👇", color=0xe74c3c)
     await channel.send(embed=embed, view=LeaveButtonView())
 
-# 🔥 [เพิ่มใหม่] Class สำหรับปุ่มอนุมัติ (ตรวจสอบยศ Admin)
 class LeaveApprovalView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=None) # ปุ่มอยู่ถาวร
+        super().__init__(timeout=None) 
 
-    # ฟังก์ชันตรวจสอบสิทธิ์ก่อนกดปุ่ม
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        # เช็คว่าคนกดมียศตามที่กำหนดหรือไม่
         has_role = discord.utils.get(interaction.user.roles, name=ROLE_ADMIN_CHECK)
         if has_role:
             return True
@@ -124,22 +128,17 @@ class LeaveApprovalView(discord.ui.View):
 
     @discord.ui.button(label="อนุมัติ", style=discord.ButtonStyle.success, custom_id="leave_approve", emoji="✅")
     async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.process_leave(interaction, "✅ อนุมัติแล้ว", 0x2ecc71) # สีเขียว
+        await self.process_leave(interaction, "✅ อนุมัติแล้ว", 0x2ecc71)
 
     @discord.ui.button(label="ไม่อนุมัติ", style=discord.ButtonStyle.danger, custom_id="leave_deny", emoji="❌")
     async def deny_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.process_leave(interaction, "❌ ไม่อนุมัติ", 0xe74c3c) # สีแดง
+        await self.process_leave(interaction, "❌ ไม่อนุมัติ", 0xe74c3c)
 
     async def process_leave(self, interaction: discord.Interaction, status_text, color_code):
-        # ดึง Embed เดิมมาแก้ไข
         original_embed = interaction.message.embeds[0]
         new_embed = original_embed.copy()
         new_embed.color = color_code
-        
-        # แก้ไข Field สุดท้าย (ช่องสถานะ)
         new_embed.set_field_at(index=3, name="📋 สถานะ", value=f"**{status_text}** โดย {interaction.user.mention}", inline=False)
-        
-        # ลบปุ่มออกและอัปเดตข้อความ
         await interaction.response.edit_message(embed=new_embed, view=None)
 
 class LeaveModal(discord.ui.Modal, title="📜 แบบฟอร์มขอลา (Leave Form)"):
@@ -165,21 +164,15 @@ class LeaveModal(discord.ui.Modal, title="📜 แบบฟอร์มขอล
         leave_data.append(entry)
         save_json(LEAVE_FILE, leave_data)
 
-        # 🔥 [แก้ไข] เปลี่ยนสีเป็นเหลือง (รออนุมัติ) และเพิ่ม Field สถานะ
         embed = discord.Embed(title="📩 มีสาส์นขอลาหยุด! (รออนุมัติ)", color=0xf1c40f)
         embed.set_thumbnail(url=interaction.user.avatar.url if interaction.user.avatar else None)
-        
         embed.add_field(name="👤 จอมยุทธ์", value=f"ชื่อ : {self.char_name.value}", inline=False)
         embed.add_field(name="📌 ประเภท", value=self.leave_type.value, inline=False)
         embed.add_field(name="📅 วันที่/เวลา", value=self.leave_date.value, inline=False)
-        
-        # เพิ่มสถานะเริ่มต้น (Index 3)
         embed.add_field(name="📋 สถานะ", value="⏳ **รอการตรวจสอบ**", inline=False)
-        
         embed.description = f"**📝 เหตุผล:** {self.reason.value or '-'}"
         embed.set_footer(text=f"ยื่นเรื่องเมื่อ: {timestamp}")
 
-        # 🔥 [แก้ไข] ส่ง View (ปุ่มอนุมัติ) ไปด้วย
         await interaction.channel.send(content=f"**ผู้ยื่นเรื่อง:** {interaction.user.mention}", embed=embed, view=LeaveApprovalView())
         
         msg = await interaction.followup.send(f"✅ ส่งใบลาเรียบร้อยแล้วครับ!", ephemeral=True)
@@ -195,7 +188,7 @@ class LeaveButtonView(discord.ui.View):
         await interaction.response.send_modal(LeaveModal())
 
 # ==========================================
-# 🆕 ระบบแนะนำตัว (Super Smooth Flow)
+# 🆕 ระบบแนะนำตัว
 # ==========================================
 
 class IntroModal(discord.ui.Modal, title="📝 ข้อมูลแนะนำตัว"):
@@ -203,12 +196,7 @@ class IntroModal(discord.ui.Modal, title="📝 ข้อมูลแนะนำ
     age = discord.ui.TextInput(label="อายุ", placeholder="ระบุอายุ...", required=True)
 
     async def on_submit(self, interaction: discord.Interaction):
-        data = {
-            "name": self.name.value,
-            "age": self.age.value,
-            "char_name": "-", 
-            "class": "-"      
-        }
+        data = {"name": self.name.value, "age": self.age.value, "char_name": "-", "class": "-"}
         view = GameSelectView(data)
         await interaction.response.send_message("🎮 **โปรดเลือกเกมที่คุณเล่น:**", view=view, ephemeral=True)
 
@@ -310,12 +298,13 @@ async def finalize_intro(interaction, data):
 
     if roles_to_add:
         try: await user.add_roles(*roles_to_add)
-        except: pass
+        except Exception as e: logger.error(f"Cannot add roles: {e}")
 
     try:
         new_nick = f"{icon_prefix} {user.name} ({data['name']})" if icon_prefix else f"{user.name} ({data['name']})"
         await user.edit(nick=new_nick)
-    except: pass
+    except Exception as e:
+        logger.warning(f"Cannot change nickname for {user.name}: {e} (Bot role might be lower)")
 
     embed = discord.Embed(title="✅ สมาชิกใหม่รายงานตัว!", color=0xffd700)
     desc = f"**ชื่อเล่น :** {data['name']}\n\n**อายุ :** {data['age']}\n\n**เกมที่เล่น :** {data['game']}"
@@ -325,10 +314,7 @@ async def finalize_intro(interaction, data):
         desc += f"\n\n**สายอาชีพ :** {data['class']}"
     
     embed.description = desc
-    
-    # ✅ ส่วนนี้ยังมีรูปโปรไฟล์อยู่ (ตามที่ท่านต้องการ)
     if user.avatar: embed.set_thumbnail(url=user.avatar.url)
-    
     embed.set_footer(text=f"แนะนำตัวโดย {user.name}")
 
     pub_ch = discord.utils.get(guild.text_channels, name=PUBLIC_CHANNEL)
@@ -377,11 +363,15 @@ async def setup(ctx):
     await ctx.message.delete()
     pub_ch = discord.utils.get(ctx.guild.text_channels, name=PUBLIC_CHANNEL)
     leave_ch = discord.utils.get(ctx.guild.text_channels, name=CHANNEL_LEAVE)
+    
     if pub_ch: await refresh_setup_msg(pub_ch)
+    else: await ctx.send(f"⚠️ หาห้อง {PUBLIC_CHANNEL} ไม่เจอ")
+    
     if leave_ch: await refresh_leave_msg(ctx.guild)
-    await ctx.send("✅ รีเฟรชปุ่มทั้ง 2 ห้องเรียบร้อย!")
+    else: await ctx.send(f"⚠️ หาห้อง {CHANNEL_LEAVE} ไม่เจอ")
+    
+    await ctx.send("✅ รีเฟรชระบบเรียบร้อย (ข้อความนี้จะลบเองใน 5 วิ)", delete_after=5)
 
-# Commands อื่นๆ
 @bot.tree.command(name="เช็คคนลา", description="📋 ดูรายชื่อคนที่ลาอยู่")
 async def check_leaves(interaction: discord.Interaction):
     if not leave_data: return await interaction.response.send_message("✅ ไม่มีใครลาเลยครับ!", ephemeral=True)
@@ -423,9 +413,6 @@ async def ask_ai(interaction: discord.Interaction, question: str):
         await interaction.followup.send(embed=embed)
     except Exception as e: await interaction.followup.send(f"😵 Error: {e}", ephemeral=True)
 
-# ==========================================
-# 🔮 6. ดูดวง (No User Pic, Big Text Only)
-# ==========================================
 @bot.tree.command(name="ดูดวง", description="🔮 เช็คดวงกาชา/Tune ประจำวัน")
 async def fortune(interaction: discord.Interaction):
     if interaction.channel.name != ALLOWED_CHANNEL_FORTUNE:
@@ -446,17 +433,13 @@ async def fortune(interaction: discord.Interaction):
 
     selection = random.choice(fortunes_data)
 
-    # ❌ ส่วนนี้ไม่มี set_thumbnail (เอาออกแล้วตามคำสั่ง)
     embed = discord.Embed(
         title="🔮 เสี่ยงเซียมซีวัดดวง",
         description=f"# {selection['text']}", 
         color=selection["color"]
     )
     
-    # รูป GIF ใหญ่
     embed.set_image(url=selection["img"])
-    
-    # ชื่อผู้เสี่ยงทายอยู่ที่ Footer เท่านั้น (ไม่มีรูป)
     embed.set_footer(text=f"ผู้เสี่ยงทาย: {interaction.user.display_name} • Devils DenBot")
 
     await interaction.response.send_message(embed=embed)
@@ -493,7 +476,16 @@ async def on_ready():
     bot.add_view(LeaveButtonView())
     bot.add_view(LeaveApprovalView()) 
 
+    # รีเฟรชเฉพาะห้องแจ้งลา (ถ้ามี)
     for guild in bot.guilds:
         await refresh_leave_msg(guild)
+        
+    # 🔥 2. สั่งรันเว็บเซิร์ฟเวอร์ (สำคัญมาก)
+    keep_alive()
 
-bot.run(os.getenv("DISCORD_TOKEN"))
+# 🔥 เช็ค Token ก่อนรัน
+TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    logger.critical("❌ ไม่พบ DISCORD_TOKEN ใน .env")
+else:
+    bot.run(TOKEN)
