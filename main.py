@@ -9,11 +9,11 @@ import random
 import logging
 import google.generativeai as genai
 
-# 🔥 1. เพิ่ม import keep_alive (สำคัญมากถ้าจะเอาขึ้น Server)
+# 🔥 1. IMPORT KEEP_ALIVE
 from keep_alive import keep_alive 
 
 # ==========================================
-# 📝 2. ตั้งค่าระบบ Log
+# 📝 ตั้งค่าระบบ Log
 # ==========================================
 logging.basicConfig(
     level=logging.INFO,
@@ -30,13 +30,13 @@ intents.members = True
 bot = commands.Bot(command_prefix='-', intents=intents)
 
 # ==========================================
-# ⚙️ 3. ตั้งค่า (Config)
+# ⚙️ ตั้งค่า (Config)
 # ==========================================
 PUBLIC_CHANNEL = "ห้องแนะนำตัว"
 CHANNEL_LEAVE = "ห้องแจ้งลา"        
 ALLOWED_CHANNEL_FORTUNE = "ห้องเช็คดวง"
 
-# ⚠️ ข้อควรระวัง: ชื่อยศต้องตรงกับใน Discord เป๊ะๆ 100%
+# ⚠️ ชื่อยศต้องตรงกับใน Discord เป๊ะๆ
 ROLE_ADMIN_CHECK = "‹ 𝑆𝑦𝑠𝑡𝑒𝑚 𝐴𝑑𝑚𝑖𝑛 ⚖️ ›" 
 
 ROLE_VERIFIED = "‹ แนะนำตัวแล้ว ›"
@@ -50,7 +50,7 @@ ROLE_HYBRID = "ไฮบริด 🧬"
 LEAVE_FILE = "leaves.json"
 
 # ==========================================
-# 🧠 4. AI Setup
+# 🧠 AI Setup
 # ==========================================
 GENAI_VERSION = genai.__version__
 BOT_PERSONA = """
@@ -82,7 +82,7 @@ except Exception as e:
     logger.critical(f"🔥 Critical Error loading AI: {e}")
 
 # ==========================================
-# 5. ระบบจัดการไฟล์
+# ระบบจัดการไฟล์
 # ==========================================
 def load_json(filename):
     if not os.path.exists(filename): return []
@@ -96,7 +96,7 @@ def save_json(filename, data):
 leave_data = load_json(LEAVE_FILE)
 
 # ==========================================
-# 6. ระบบ GUI (ใบลา & แนะนำตัว)
+# ระบบ GUI (ใบลา & แนะนำตัว)
 # ==========================================
 
 async def refresh_leave_msg(guild):
@@ -471,7 +471,7 @@ async def nuke_channel(interaction: discord.Interaction):
 async def on_ready():
     logger.info(f"🚀 Logged in as {bot.user}")
     
-    # ✅ เพิ่ม View ทั้งหมดลงใน Persistent View เพื่อให้ทำงานได้หลังรีสตาร์ท
+    # ✅ เพิ่ม View ทั้งหมดลงใน Persistent View
     bot.add_view(TicketButton())
     bot.add_view(LeaveButtonView())
     bot.add_view(LeaveApprovalView()) 

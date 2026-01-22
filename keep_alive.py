@@ -5,12 +5,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    # โหลดหน้าแรก
     return render_template('index.html')
 
 @app.route('/draw')
 def draw():
-    # โหลดหน้าสุ่ม
     return render_template('draw.html')
 
 def run():
