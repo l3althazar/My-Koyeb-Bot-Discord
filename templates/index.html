@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devils Den - Home</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Kanit:wght@300;400;600&family=Metal+Mania&family=New+Rocker&family=Nosifer&family=Pirata+One&family=Rubik+Wet+Paint&family=Taviraj:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- THEME SETTINGS --- */
+        :root {
+            --primary: #dc2626;   
+            --secondary: #d4af37; 
+            --cursor-grey: #6b7280; 
+            --dark-bg: #020202;   
+            --bg-overlay: rgba(0, 0, 0, 0.75); 
+            --logo-font: "New Rocker", cursive;
+            --title-font: "Rubik Wet Paint", system-ui;
+            --roman-font: 'Cinzel', serif;
+            --body-font: 'Kanit', sans-serif;
+            --ancient-thai-font: 'Taviraj', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--body-font); cursor: none !important; }
+        
+        body {
+            background-color: var(--dark-bg);
+            background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        /* --- FIXED BACKGROUND --- */
+        .bg-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: inherit; z-index: -10; }
+
+        /* --- START OVERLAY --- */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 90000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease-out;
+        }
+        #start-overlay h1 { font-family: var(--title-font); font-size: 5rem; color: var(--primary); text-shadow: 0 0 20px var(--primary); animation: pulse-start 2s infinite; }
+        #start-overlay p { font-family: var(--roman-font); font-size: 1.2rem; color: #888; margin-top: 20px; letter-spacing: 5px; }
+        @keyframes pulse-start { 0% { opacity: 0.7; } 50% { opacity: 1; text-shadow: 0 0 50px red; } 100% { opacity: 0.7; } }
+
+        /* --- CURSOR --- */
+        .cursor-main {
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 999999; 
+            width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 22px solid var(--cursor-grey); transform: translate(-50%, -50%) rotate(-30deg);
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8)); transition: transform 0.1s;
+        }
+        .cursor-main::after { content: ''; position: absolute; top: 15px; left: -2px; width: 4px; height: 4px; background: #fff; border-radius: 50%; box-shadow: 0 0 5px #fff; }
+        .cursor-hover { border-bottom-color: var(--primary); transform: translate(-50%, -50%) rotate(0deg) scale(1.5); filter: drop-shadow(0 0 15px var(--primary)); }
+
+        /* --- FX (FOG) --- */
+        .fog-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -5; pointer-events: none; }
+        .fog-img { position: absolute; height: 100vh; width: 300vw; background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/img/fog1.png') repeat-x; background-size: contain; animation: fog 60s linear infinite; opacity: 0.4; }
+        .fog-img-2 { position: absolute; height: 100vh; width: 300vw; background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/img/fog2.png') repeat-x; background-size: contain; animation: fog 40s linear infinite; top: 30%; opacity: 0.3; }
+        @keyframes fog { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200vw, 0, 0); } }
+        .mist-particle { position: fixed; pointer-events: none; background: radial-gradient(circle, rgba(100,100,100,0.5) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; z-index: 9998; animation: trail-smoke 1.8s ease-out forwards; filter: blur(8px); }
+        @keyframes trail-smoke { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* --- NAV --- */
+        nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent); }
+        .logo-container { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .logo-main { font-family: var(--logo-font); font-size: 2.2rem; line-height: 1; }
+        .logored { color: var(--primary); text-shadow: 0 0 20px var(--primary); }
+        .logowhite { color: white; text-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .logo-sub { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
+        .nav-right { display: flex; align-items: center; gap: 40px; }
+        .nav-links { display: flex; gap: 60px; }
+        .nav-links a { text-decoration: none; color: #aaa; font-family: var(--roman-font); font-weight: 700; font-size: 0.9rem; letter-spacing: 2px; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .audio-toggle-btn { background: transparent; border: 2px solid #444; color: #666; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+        .audio-toggle-btn.playing { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 10px var(--primary); animation: pulse-audio 2s infinite; }
+        @keyframes pulse-audio { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 100% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } }
+
+        /* --- SCROLL & SECTIONS --- */
+        .scroll-container { height: 100vh; overflow: hidden; position: relative; z-index: 20; }
+        .scroll-wrapper { transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); height: 100%; }
+        section { height: 100vh; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; background: transparent !important; }
+
+        /* HERO */
+        .hero-content { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 0 20px; }
+        .title-top { font-family: var(--title-font); font-size: 7rem; line-height: 1.1; background: linear-gradient(180deg, #ff4d4d 0%, #dc2626 50%, #4a0404 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 5px 15px rgba(0,0,0,0.8); margin: 0; }
+        .title-bottom-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; gap: 20px; margin-top: -10px; }
+        .desc-box { text-align: right; color: rgba(255,255,255,0.9); font-family: var(--ancient-thai-font); font-size: 1.2rem; max-width: 450px; border-right: 3px solid rgba(255,255,255,0.4); padding-right: 20px; text-shadow: 0 2px 5px black; }
+        .title-bot { font-family: var(--title-font); font-size: 7rem; line-height: 1; color: white; margin: 0; text-shadow: 3px 3px 2px #000, 5px 5px 10px rgba(0,0,0,0.8); }
+        .btn-wrapper { margin-top: 30px; }
+        .btn-gothic { padding: 15px 50px; font-family: var(--roman-font); font-size: 1.2rem; color: #ccc; font-weight: bold; text-decoration: none; text-transform: uppercase; letter-spacing: 3px; background: rgba(0,0,0,0.8); border: 2px solid #555; border-radius: 4px; display: block; transition: 0.3s; }
+        .btn-gothic:hover { color: #fff; background: #1a0505; border-color: var(--primary); box-shadow: 0 0 30px rgba(220,38,38,0.5); transform: translateY(-3px); }
+        
+        /* SCROLL INDICATOR (Fixed Position) */
+        .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5; opacity: 0.8; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .scroll-indicator:hover { opacity: 1; transform: translateX(-50%) scale(1.1); color: var(--primary); }
+        .mouse-icon { width: 26px; height: 42px; border: 2px solid #fff; border-radius: 15px; position: relative; margin-bottom: 8px; }
+        .wheel { width: 4px; height: 6px; background: var(--primary); border-radius: 2px; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); animation: scroll-anim 1.5s infinite; }
+        @keyframes scroll-anim { 0% { top: 8px; opacity: 1; } 100% { top: 22px; opacity: 0; } }
+
+        /* FEATURES */
+        .section-features { justify-content: center; padding: 60px 20px; padding-bottom: 80px; /* เพิ่ม Padding เผื่อ Footer */ }
+        .features-title { font-family: var(--logo-font); font-size: 4rem; color: white; text-transform: uppercase; text-shadow: 0 0 15px rgba(255,255,255,0.2); position: relative; display: inline-block; margin-bottom: 50px; }
+        .features-title::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 100px; height: 4px; background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; max-width: 1200px; z-index: 5; }
+        .feature-card { background: rgba(10, 10, 10, 0.85); border: 1px solid #333; border-radius: 12px; padding: 30px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .feature-card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(220, 38, 38, 0.2); transform: translateY(-5px); }
+        .feature-icon { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; }
+        .feature-name { font-family: var(--logo-font); font-size: 1.8rem; color: #fff; margin-bottom: 15px; }
+        .feature-desc { font-family: var(--body-font); font-size: 1rem; color: #ccc; line-height: 1.6; }
+
+        /* --- FOOTER (FIXED) --- */
+        .site-footer { 
+            position: absolute; /* เปลี่ยนจาก Fixed เป็น Absolute เพื่อยึดกับ Section */
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 15px 20px; 
+            background: linear-gradient(to top, #000000 10%, rgba(0,0,0,0) 100%); 
+            text-align: center; 
+            z-index: 10; 
+            font-family: var(--body-font); 
+            border-top: 1px solid rgba(220, 38, 38, 0.1); 
+            backdrop-filter: blur(2px); 
+        }
+        .footer-content { font-size: 0.75rem; color: #666; letter-spacing: 1px; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .footer-link { color: var(--primary); text-decoration: none; font-weight: bold; transition: all 0.3s ease; }
+        .footer-link:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
+        .footer-divider { color: #333; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-overlay" onclick="enterSite()">
+        <h1>CLICK TO ENTER</h1>
+        <p>THE ABYSS AWAITS</p>
+    </div>
+
+    <div class="bg-fixed"></div>
+    
+    <div class="fog-container">
+        <div class="fog-img"></div>
+        <div class="fog-img-2"></div>
+    </div>
+
+    <div class="cursor-main" id="cursor-main"></div>
+    
+    <nav>
+        <div class="logo-container" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+            <div class="logo-main"><span class="logored">DEVILS-</span><span class="logowhite">DEN</span></div>
+            <div class="logo-sub">Official Site</div>
+        </div>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="#" onclick="manualScroll(0)" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">HOME</a>
+                <a href="#" onclick="manualScroll(1)" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">FEATURES</a>
+                <a href="draw.html" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">HELL DRAW</a>
+                <a href="https://www.facebook.com/l3althazar.bas" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">CONTACT</a>
+            </div>
+            <div class="audio-toggle-btn" id="audio-toggle" onclick="toggleMusic()" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="scroll-container">
+        <div class="scroll-wrapper" id="scroll-wrapper">
+            
+            <section class="section-hero">
+                <div class="hero-content">
+                    <div class="hero-title-block">
+                        <h1 class="title-top">DEVILS-DEN</h1>
+                        <div class="title-bottom-row">
+                            <p class="desc-box">ผู้ช่วยอัจฉริยะจากขุมนรก ที่จะจัดการเซิร์ฟเวอร์ของคุณด้วยพลังมืด ครบจบในที่เดียว</p>
+                            <h1 class="title-bot">BOT</h1>
+                        </div>
+                    </div>
+                    <div class="btn-wrapper" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <a href="#" class="btn-gothic"><i class="fa-brands fa-discord"></i> INVITE BOT</a>
+                    </div>
+                </div>
+                <div class="scroll-indicator" onclick="manualScroll(1)" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                    <div class="mouse-icon"><div class="wheel"></div></div>
+                    <div class="scroll-text">Scroll Down</div>
+                </div>
+            </section>
+
+            <section class="section-features">
+                <h2 class="features-title">SYSTEM FEATURES</h2>
+                <div class="features-grid">
+                    <div class="feature-card" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <div class="feature-icon"><i class="fa-solid fa-gavel"></i></div>
+                        <h3 class="feature-name">Moderation Tools</h3>
+                        <p class="feature-desc">เครื่องมือสำหรับผู้ดูแลระบบ เช่น การลบข้อความจำนวนมาก หรือการจัดการห้องแชทเพื่อความเรียบร้อย</p>
+                    </div>
+                    <div class="feature-card" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <div class="feature-icon"><i class="fa-solid fa-user-check"></i></div>
+                        <h3 class="feature-name">Verification</h3>
+                        <p class="feature-desc">ระบบยืนยันตัวตนสำหรับสมาชิกใหม่ ช่วยคัดกรองคนและมอบยศเริ่มต้นให้อัตโนมัติ</p>
+                    </div>
+                    <div class="feature-card" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+                        <h3 class="feature-name">AI Assistant</h3>
+                        <p class="feature-desc">พูดคุยและสอบถามข้อมูลกับ AI อัจฉริยะ (Gemini) ที่พร้อมตอบคำถามของคุณได้ตลอดเวลา</p>
+                    </div>
+                    <div class="feature-card" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <div class="feature-icon"><i class="fa-solid fa-user-clock"></i></div>
+                        <h3 class="feature-name">Leave & Approval</h3>
+                        <p class="feature-desc">ระบบยื่นใบลาพร้อมฟังก์ชันอนุมัติสำหรับ Admin ช่วยให้การจัดการสมาชิกในกิลด์เป็นระเบียบและมาตรฐาน</p>
+                    </div>
+                    <div class="feature-card" onmouseenter="hoverCursor(true)" onmouseleave="hoverCursor(false)">
+                        <div class="feature-icon"><i class="fa-solid fa-dice"></i></div>
+                        <h3 class="feature-name">Fortune & Fun</h3>
+                        <p class="feature-desc">ระบบเสี่ยงดวงทำนายโชคชะตาประจำวัน และมินิเกมต่างๆ เพื่อสร้างสีสันและความบันเทิงในเซิร์ฟเวอร์</p>
+                    </div>
+                </div>
+
+                <footer class="site-footer">
+                    <div class="footer-content">
+                        <span>&copy; 2026 DEVILS DEN</span>
+                        <span class="footer-divider">|</span>
+                        <span>ALL RIGHTS RESERVED</span>
+                        <span class="footer-divider">|</span>
+                        <span>DESIGNED BY <a href="#" class="footer-link">DEVILS TEAM</a></span>
+                    </div>
+                </footer>
+            </section>
+
+        </div>
+    </div>
+
+    <audio id="bg-music" src="/static/sound/bg.mp3" loop></audio>
+
+    <script>
+        const cursorMain = document.getElementById('cursor-main');
+        const bgMusic = document.getElementById('bg-music');
+        const audioIcon = document.getElementById('audio-icon');
+        const audioBtn = document.getElementById('audio-toggle');
+        const startOverlay = document.getElementById('start-overlay');
+        let isMusicPlaying = false;
+
+        document.addEventListener('mousemove', (e) => {
+            cursorMain.style.left = e.clientX + 'px'; cursorMain.style.top = e.clientY + 'px'; createSmoke(e.clientX, e.clientY);
+        });
+        function hoverCursor(active) { active ? cursorMain.classList.add('cursor-hover') : cursorMain.classList.remove('cursor-hover'); }
+        
+        function createSmoke(x, y) {
+            if(Math.random() > 0.4) return;
+            const mist = document.createElement('div'); mist.className = 'mist-particle'; document.body.appendChild(mist);
+            const size = Math.random() * 30 + 20; mist.style.width = size + 'px'; mist.style.height = size + 'px';
+            const spread = Math.random() * 40 - 20; mist.style.left = (x + spread) + 'px'; mist.style.top = (y + spread) + 'px';
+            setTimeout(() => mist.remove(), 1800);
+        }
+
+        function enterSite() {
+            startOverlay.style.opacity = 0;
+            setTimeout(() => { startOverlay.remove(); }, 1000);
+            bgMusic.volume = 0.3;
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                audioIcon.className = 'fa-solid fa-volume-high';
+                audioBtn.classList.add('playing');
+            }).catch(e => console.log("Audio Play Failed:", e));
+        }
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                audioIcon.className = 'fa-solid fa-volume-xmark';
+                audioBtn.classList.remove('playing');
+                isMusicPlaying = false;
+            } else {
+                bgMusic.volume = 0.3;
+                bgMusic.play();
+                audioIcon.className = 'fa-solid fa-volume-high';
+                audioBtn.classList.add('playing');
+                isMusicPlaying = true;
+            }
+        }
+
+        // SCROLL LOGIC
+        let currentSection = 0; 
+        const wrapper = document.getElementById('scroll-wrapper');
+        const totalSections = 2; // Home, Features
+        let isScrolling = false;
+
+        function scrollToSection(index) {
+            if (index < 0 || index >= totalSections) return;
+            currentSection = index;
+            wrapper.style.transform = `translateY(-${currentSection * 100}vh)`;
+            isScrolling = true; setTimeout(() => { isScrolling = false; }, 1200);
+        }
+        window.addEventListener('wheel', (e) => {
+            if (isScrolling) return;
+            if (e.deltaY > 0) scrollToSection(currentSection + 1);
+            else scrollToSection(currentSection - 1);
+        });
+        function manualScroll(index) { scrollToSection(index); }
+    </script>
+</body>
+</html>
