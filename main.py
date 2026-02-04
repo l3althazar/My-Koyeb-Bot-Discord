@@ -75,7 +75,7 @@ try:
         KEY_DEBUG_INFO = f"{GEMINI_API_KEY[:5]}...{GEMINI_API_KEY[-4:]} (ยาว: {k_len})"
         genai.configure(api_key=GEMINI_API_KEY)
         # แก้ไขจาก 2.5 เป็น models/gemini-1.5-flash เพื่อแก้ 404 Error
-        model = genai.GenerativeModel('models/gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         AI_STATUS = "✅ พร้อมใช้งาน"
         logger.info("✅ Gemini Model loaded successfully.")
 except Exception as e:
